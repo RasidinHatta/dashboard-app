@@ -18,16 +18,19 @@ export default function EmployeesPage() {
   const [nameFilter, setNameFilter] = useState('');
   const [roleFilter, setRoleFilter] = useState<'INTERN' | 'ADMIN' | 'ENGINEER' | ''>('');
   const [emailFilter, setEmailFilter] = useState('');
-  
+
   // Fetch filtered data when filters change
   useEffect(() => {
     const queryParams = new URLSearchParams();
-    
+
     if (nameFilter) queryParams.append('name', nameFilter);
     if (roleFilter) queryParams.append('role', roleFilter);
     if (emailFilter) queryParams.append('email', emailFilter);
 
-    fetch(`http://localhost:3001/api/employees?${queryParams.toString()}`)
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001";
+
+
+    fetch(`${baseUrl}/api/employees?${queryParams.toString()}`)
       .then((response) => response.json())
       .then((data) => {
         setEmployees(data);
