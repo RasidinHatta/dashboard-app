@@ -27,7 +27,7 @@ export default function EmployeesPage() {
     if (roleFilter) queryParams.append('role', roleFilter);
     if (emailFilter) queryParams.append('email', emailFilter);
 
-    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_LOCAL_API_BASE_URL;
 
 
     fetch(`${baseUrl}/api/employees?${queryParams.toString()}`)
