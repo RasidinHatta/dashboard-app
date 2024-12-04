@@ -1,54 +1,81 @@
-"use client"
+"use client";
 
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
-  } from "@/components/ui/dropdown-menu"
-import { MegaMenu } from 'primereact/megamenu';
-import { Moon, MoonIcon, Sun } from "lucide-react"
-import { Button } from './ui/button';
-import { useTheme } from "next-themes"
+} from "@/components/ui/dropdown-menu";
+import { MegaMenu } from "primereact/megamenu";
+import { Moon, Sun } from "lucide-react";
+import { Button } from "./ui/button";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
+import "./header.css";
+
 export default function Header() {
+    const { setTheme, resolvedTheme } = useTheme(); // Use resolvedTheme to get current theme
+    const [mounted, setMounted] = useState(false); // Ensure the component is mounted
+
+    useEffect(() => {
+        // Ensure the component only renders client-side (hydration)
+        setMounted(true);
+    }, []);
+
+    // Don't render anything until mounted to prevent mismatch
+    if (!mounted) {
+        return null;
+    }
+
     const items = [
         {
-            label: 'Home',
-            icon: 'pi pi-fw pi-home',
-            command: () => window.location.href = '/' // Always available
+            label: "Home",
+            icon: "pi pi-fw pi-home",
+            command: () => (window.location.href = "/"),
         },
         {
-            label: 'Dashboard',
-            icon: 'pi pi-fw pi-th-large', // Change to a more appropriate icon
-            command: () => window.location.href = '/employees',
-        }
+            label: "Employees",
+            icon: "pi pi-fw pi-th-large",
+            command: () => (window.location.href = "/employees"),
+        },
     ];
-    const { setTheme } = useTheme()
+
+    const toggleTheme = () => (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon">
+                    {/* Dynamically adjust icon color */}
+                    <Sun
+                        className={`h-[1.2rem] w-[1.2rem] transition-all ${resolvedTheme === "dark" ? "hidden" : "text-neutral-900"}`}
+                    />
+                    <Moon
+                        className={`absolute h-[1.2rem] w-[1.2rem] transition-all ${resolvedTheme === "light" ? "hidden" : "text-neutral-100"}`}
+                    />
+                    <span className="sr-only">Toggle theme</span>
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setTheme("light")}>
+                    Light
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setTheme("dark")}>
+                    Dark
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setTheme("system")}>
+                    System
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+    );
 
     return (
-        <div className="text-neutral-100 p-3">
-            <MegaMenu model={items} orientation="horizontal" className='pl-20 gap-10 h-auto' />
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon">
-                        <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                        <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                        <span className="sr-only">Toggle theme</span>
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => setTheme("light")}>
-                        Light
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setTheme("dark")}>
-                        Dark
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setTheme("system")}>
-                        System
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
+        <div className="p-10">
+            <MegaMenu
+                model={items}
+                orientation="horizontal"
+                className="p-3 surface-0 shadow-2"
+                end={toggleTheme}
+            />
         </div>
-
     );
 }

@@ -71,8 +71,6 @@ export default function EmployeesPage() {
     return 0;
   });
 
-  if (loading) return <p>Loading...</p>;
-
   return (
     <div className="flex items-center justify-center">
       <Card className="w-[80%]">
