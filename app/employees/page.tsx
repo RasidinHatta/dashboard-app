@@ -126,7 +126,7 @@ export default function EmployeesPage() {
               {loading ? (
                 <TableRow>
                   <TableCell colSpan={3} className="text-center py-4">
-                    <ProgressSpinner style={{ width: '50px', height: '50px' }} strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s" />
+                    <ProgressSpinner style={{ width: '50px', height: '50px' }} strokeWidth="8" animationDuration=".5s" />
                   </TableCell>
                 </TableRow>
               ) : (
