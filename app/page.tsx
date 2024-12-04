@@ -4,7 +4,7 @@ export default async function Home() {
 
   return (
     <div className="flex items-center justify-center">
-      <Card className="w-[80%]">
+      <Card className="w-[92%]">
         <CardHeader>
           <CardTitle>Home</CardTitle>
           <CardDescription>Home Page Description</CardDescription>

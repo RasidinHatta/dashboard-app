@@ -74,7 +74,7 @@ export default function EmployeesPage() {
 
   return (
     <div className="flex items-center justify-center">
-      <Card className="w-[80%]">
+      <Card className="w-[92%]">
         <CardHeader>
           <CardTitle>Employees</CardTitle>
           <CardDescription>Employees List</CardDescription>
