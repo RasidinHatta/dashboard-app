@@ -38,24 +38,31 @@ export default function EmployeesPage() {
 
   // Fetch data on filter change
   useEffect(() => {
-    const queryParams = new URLSearchParams();
-    if (nameFilter) queryParams.append('name', nameFilter);
-    if (roleFilter) queryParams.append('role', roleFilter);
-    if (emailFilter) queryParams.append('email', emailFilter);
+    const fetchData = async () => {
+      try {
+        const queryParams = new URLSearchParams();
+        if (nameFilter) queryParams.append('name', nameFilter);
+        if (roleFilter) queryParams.append('role', roleFilter);
+        if (emailFilter) queryParams.append('email', emailFilter);
 
-    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_LOCAL_API_BASE_URL;
+        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_LOCAL_API_BASE_URL;
 
-    fetch(`${baseUrl}/api/employees?${queryParams.toString()}`)
-      .then((response) => response.json())
-      .then((data) => {
+        const response = await fetch(`${baseUrl}/api/employees?${queryParams.toString()}`);
+        if (!response.ok) throw new Error(`API error: ${response.statusText}`);
+
+        const data = await response.json();
         setEmployees(data);
-        setLoading(false);
-      })
-      .catch((error) => {
+        console.log('API response:', data);
+      } catch (error) {
         console.error('Error fetching employees:', error);
+        setEmployees([]); // Set an empty array to avoid mapping over `undefined`
+      } finally {
         setLoading(false);
-      });
-  }, [nameFilter, roleFilter, emailFilter]); // Re-fetch on filter changes
+      }
+    };
+
+    fetchData();
+  }, [nameFilter, roleFilter, emailFilter]);
 
   return (
     <div className="flex items-center justify-center">
