@@ -36,6 +36,9 @@ export default function EmployeesPage() {
   const [roleFilter, setRoleFilter] = useState<'INTERN' | 'ADMIN' | 'ENGINEER' | ''>('');
   const [emailFilter, setEmailFilter] = useState('');
 
+  // Sorting state
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+
   // Fetch data on filter change
   useEffect(() => {
     const fetchData = async () => {
@@ -63,6 +66,16 @@ export default function EmployeesPage() {
 
     fetchData();
   }, [nameFilter, roleFilter, emailFilter]);
+
+  // Handle sorting
+  const handleSort = () => {
+    const sortedEmployees = [...employees].sort((a, b) => {
+      const comparison = a.email.localeCompare(b.email);
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
+    setEmployees(sortedEmployees);
+    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+  };
 
   return (
     <div className="flex items-center justify-center">
@@ -103,7 +116,9 @@ export default function EmployeesPage() {
               <TableRow>
                 <TableCell>Name</TableCell>
                 <TableCell>Role</TableCell>
-                <TableCell>Email</TableCell>
+                <TableCell onClick={handleSort} className="cursor-pointer">
+                  Email {sortOrder === 'asc' ? '▲' : '▼'}
+                </TableCell>
               </TableRow>
             </TableHeader>
             <TableBody>
