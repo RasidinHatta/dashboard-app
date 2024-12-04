@@ -19,6 +19,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal } from 'lucide-react';
+import { ProgressSpinner } from 'primereact/progressspinner';
 
 interface Employee {
   id: number;
@@ -122,13 +123,21 @@ export default function EmployeesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {sortedEmployees.map((employee) => (
-                <TableRow key={employee.id}>
-                  <TableCell>{employee.name}</TableCell>
-                  <TableCell>{employee.role}</TableCell>
-                  <TableCell>{employee.email}</TableCell>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={3} className="text-center py-4">
+                    <ProgressSpinner style={{ width: '50px', height: '50px' }} strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s" />
+                  </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                sortedEmployees.map((employee) => (
+                  <TableRow key={employee.id}>
+                    <TableCell>{employee.name}</TableCell>
+                    <TableCell>{employee.role}</TableCell>
+                    <TableCell>{employee.email}</TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </CardContent>
