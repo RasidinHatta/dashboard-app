@@ -37,10 +37,6 @@ export default function EmployeesPage() {
   const [roleFilter, setRoleFilter] = useState<'INTERN' | 'ADMIN' | 'ENGINEER' | ''>('');
   const [emailFilter, setEmailFilter] = useState('');
 
-  // Sorting state
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-  const [sortColumn, setSortColumn] = useState<string>('email');
-
   // Fetch data on filter change
   useEffect(() => {
     const queryParams = new URLSearchParams();
@@ -61,16 +57,6 @@ export default function EmployeesPage() {
         setLoading(false);
       });
   }, [nameFilter, roleFilter, emailFilter]); // Re-fetch on filter changes
-
-  // Sort employees
-  const sortedEmployees = [...employees].sort((a, b) => {
-    if (sortColumn === 'email') {
-      const emailA = a.email.toLowerCase();
-      const emailB = b.email.toLowerCase();
-      return sortOrder === 'asc' ? emailA.localeCompare(emailB) : emailB.localeCompare(emailA);
-    }
-    return 0;
-  });
 
   return (
     <div className="flex items-center justify-center">
@@ -111,15 +97,7 @@ export default function EmployeesPage() {
               <TableRow>
                 <TableCell>Name</TableCell>
                 <TableCell>Role</TableCell>
-                <TableCell
-                  onClick={() => {
-                    setSortColumn('email');
-                    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-                  }}
-                  className="cursor-pointer"
-                >
-                  Email {sortOrder === 'asc' ? '🔼' : '🔽'}
-                </TableCell>
+                <TableCell>Email</TableCell>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -130,7 +108,7 @@ export default function EmployeesPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                sortedEmployees.map((employee) => (
+                employees.map((employee) => (
                   <TableRow key={employee.id}>
                     <TableCell>{employee.name}</TableCell>
                     <TableCell>{employee.role}</TableCell>
