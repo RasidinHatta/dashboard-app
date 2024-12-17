@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal } from 'lucide-react';
 import { ProgressSpinner } from 'primereact/progressspinner';
+import { useToast } from "@/hooks/use-toast"
 import { useRouter } from 'next/navigation';
 
 interface Employee {
@@ -41,7 +42,9 @@ export default function EmployeesPage() {
   // Sorting state
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
-  // Fetch data on filter chang
+  const { toast } = useToast(); // Destructure toast hook
+
+  // Fetch data on filter change
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -84,6 +87,42 @@ export default function EmployeesPage() {
     router.push('/employees/create'); // Navigate to the "/create" page when clicked
   };
 
+  // Handle Edit action
+  const handleEdit = (id: number) => {
+    router.push(`/employees/edit/${id}`); // Navigate to an edit page
+  };
+
+  // Handle Delete action
+  const handleDelete = async (id: number, name: string) => {
+    if (confirm('Are you sure you want to delete this employee?')) {
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_LOCAL_API_BASE_URL;
+        const response = await fetch(`${baseUrl}/api/employees/${id}`, {
+          method: 'DELETE',
+        });
+        if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+
+        setEmployees(employees.filter((employee) => employee.id !== id)); // Remove from the state
+
+        // Show success toast
+        toast({
+          title: 'Success!',
+          description: `Employee named "${name}" with ID ${id} was successfully deleted.`,
+        });
+        console.log(id,name)
+      } catch (error) {
+        console.error('Error deleting employee:', error);
+
+        // Show error toast
+        toast({
+          title: 'Error',
+          description: 'Failed to delete the employee. Please try again.',
+          variant: 'destructive',
+        });
+      }
+    }
+  };
+
   return (
     <div className="flex items-center justify-center">
       <Card className="w-[92%]">
@@ -95,15 +134,15 @@ export default function EmployeesPage() {
           <div className="flex gap-4 w-full justify-between">
             <div className='flex gap-10'>
 
-            <Input
-              placeholder="Filter emails..."
-              value={emailFilter}
-              onChange={(event) => setEmailFilter(event.target.value)}
-              className="max-w-sm"
-            />
-            <Button variant="secondary" className="bg-secondary" onClick={handleCreateNewUser}>
-              Create New User
-            </Button>
+              <Input
+                placeholder="Filter emails..."
+                value={emailFilter}
+                onChange={(event) => setEmailFilter(event.target.value)}
+                className="max-w-sm"
+              />
+              <Button variant="secondary" className="bg-secondary" onClick={handleCreateNewUser}>
+                Create New User
+              </Button>
             </div>
             <div>
               <DropdownMenu>
@@ -132,12 +171,13 @@ export default function EmployeesPage() {
                 <TableCell onClick={handleSort} className="cursor-pointer">
                   Email {sortOrder === 'asc' ? '▲' : '▼'}
                 </TableCell>
+                <TableCell>Action</TableCell>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={3} className="text-center py-4">
+                  <TableCell colSpan={4} className="text-center py-4">
                     <ProgressSpinner style={{ width: '50px', height: '50px' }} strokeWidth="8" animationDuration=".5s" />
                   </TableCell>
                 </TableRow>
@@ -147,6 +187,20 @@ export default function EmployeesPage() {
                     <TableCell>{employee.name}</TableCell>
                     <TableCell>{employee.role}</TableCell>
                     <TableCell>{employee.email}</TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Open menu</span>
+                            <MoreHorizontal />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleEdit(employee.id)}>Edit</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDelete(employee.id, employee.name)}>Delete</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
                   </TableRow>
                 ))
               )}
