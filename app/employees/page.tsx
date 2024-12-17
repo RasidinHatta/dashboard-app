@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal } from 'lucide-react';
 import { ProgressSpinner } from 'primereact/progressspinner';
+import { useRouter } from 'next/navigation';
 
 interface Employee {
   id: number;
@@ -35,6 +36,7 @@ export default function EmployeesPage() {
   const [nameFilter, setNameFilter] = useState('');
   const [roleFilter, setRoleFilter] = useState<'INTERN' | 'ADMIN' | 'ENGINEER' | ''>('');
   const [emailFilter, setEmailFilter] = useState('');
+  const router = useRouter();
 
   // Sorting state
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
@@ -77,6 +79,11 @@ export default function EmployeesPage() {
     setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
   };
 
+  // Handle navigation to create new user page
+  const handleCreateNewUser = () => {
+    router.push('/employees/create'); // Navigate to the "/create" page when clicked
+  };
+
   return (
     <div className="flex items-center justify-center">
       <Card className="w-[92%]">
@@ -92,6 +99,9 @@ export default function EmployeesPage() {
               onChange={(event) => setEmailFilter(event.target.value)}
               className="max-w-sm"
             />
+            <Button variant="secondary" className="bg-secondary" onClick={handleCreateNewUser}>
+              Create New User
+            </Button>
             <div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
