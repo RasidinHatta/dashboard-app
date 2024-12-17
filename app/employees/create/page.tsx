@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import { DropdownMenu, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuContent } from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const CreatePage = () => {
   const [name, setName] = useState('');
@@ -74,18 +74,16 @@ const CreatePage = () => {
               />
             </div>
             <div className="mb-4">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-full text-left">
-                    {role === 'INTERN' ? 'Intern' : role === 'ADMIN' ? 'Admin' : 'Engineer'}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-[150px]">
-                  <DropdownMenuItem onClick={() => setRole('INTERN')}>Intern</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setRole('ADMIN')}>Admin</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setRole('ENGINEER')}>Engineer</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+            <Select value={role} onValueChange={(value) => setRole(value as 'INTERN' | 'ADMIN' | 'ENGINEER')}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Select Role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="INTERN">Intern</SelectItem>
+                  <SelectItem value="ADMIN">Admin</SelectItem>
+                  <SelectItem value="ENGINEER">Engineer</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex justify-end gap-4">
               <Button

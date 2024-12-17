@@ -93,6 +93,8 @@ export default function EmployeesPage() {
         </CardHeader>
         <CardContent>
           <div className="flex gap-4 w-full justify-between">
+            <div className='flex gap-10'>
+
             <Input
               placeholder="Filter emails..."
               value={emailFilter}
@@ -102,10 +104,11 @@ export default function EmployeesPage() {
             <Button variant="secondary" className="bg-secondary" onClick={handleCreateNewUser}>
               Create New User
             </Button>
+            </div>
             <div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="h-8 w-8 p-0">
+                  <Button variant="ghost" className="h-8 w-8 p-0 bg-secondary">
                     <span className="sr-only">Open menu</span>
                     <MoreHorizontal />
                   </Button>
