@@ -5,45 +5,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
+import { DropdownMenu, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuContent } from '@/components/ui/dropdown-menu';
 
 const CreatePage = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<'INTERN' | 'ADMIN' | 'ENGINEER'>('INTERN');
   const [loading, setLoading] = useState(false);
-  const [employees, setEmployees] = useState([]);
-  const [nameFilter, setNameFilter] = useState('');
-  const [roleFilter, setRoleFilter] = useState<'INTERN' | 'ADMIN' | 'ENGINEER' | ''>('');
-  const [emailFilter, setEmailFilter] = useState('');
   const router = useRouter();
-
-  // Fetch employee data when filters change
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const queryParams = new URLSearchParams();
-        if (nameFilter) queryParams.append('name', nameFilter);
-        if (roleFilter) queryParams.append('role', roleFilter);
-        if (emailFilter) queryParams.append('email', emailFilter);
-
-        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_LOCAL_API_BASE_URL;
-
-        const response = await fetch(`${baseUrl}/api/employees?${queryParams.toString()}`);
-        if (!response.ok) throw new Error(`API error: ${response.statusText}`);
-
-        const data = await response.json();
-        setEmployees(data);
-        console.log('API response:', data);
-      } catch (error) {
-        console.error('Error fetching employees:', error);
-        setEmployees([]); // Set an empty array to avoid mapping over `undefined`
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [nameFilter, roleFilter, emailFilter]);
 
   // Handle form submission to create a new employee
   const handleSubmit = async (e: React.FormEvent) => {
@@ -105,15 +74,18 @@ const CreatePage = () => {
               />
             </div>
             <div className="mb-4">
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value as 'INTERN' | 'ADMIN' | 'ENGINEER')}
-                className="w-full p-2 border rounded"
-              >
-                <option value="INTERN">Intern</option>
-                <option value="ADMIN">Admin</option>
-                <option value="ENGINEER">Engineer</option>
-              </select>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="w-full text-left">
+                    {role === 'INTERN' ? 'Intern' : role === 'ADMIN' ? 'Admin' : 'Engineer'}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-[150px]">
+                  <DropdownMenuItem onClick={() => setRole('INTERN')}>Intern</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setRole('ADMIN')}>Admin</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setRole('ENGINEER')}>Engineer</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
             <div className="flex justify-end gap-4">
               <Button
