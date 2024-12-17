@@ -39,7 +39,7 @@ export default function EmployeesPage() {
   // Sorting state
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
-  // Fetch data on filter change
+  // Fetch data on filter chang
   useEffect(() => {
     const fetchData = async () => {
       try {
