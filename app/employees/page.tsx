@@ -246,7 +246,7 @@ export default function EmployeesPage() {
                   currentEmployees.map((employee) => (
                     <TableRow key={employee.id}>
                       <TableCell>{employee.name}</TableCell>
-                      <TableCell>{employee.role}</TableCell>
+                      <TableCell>{employee.role.charAt(0).toUpperCase() + employee.role.slice(1).toLowerCase()}</TableCell>
                       <TableCell>{employee.email}</TableCell>
                       <TableCell>
                         <DropdownMenu>
