@@ -228,14 +228,14 @@ export default function EmployeesPage() {
             <Table>
               <TableHeader className='bg-lime-500 dark:bg-purple-500'>
                 <TableRow>
-                  <TableCell onClick={handleSortByName} className="cursor-pointer">
+                  <TableCell  className='w-[30%] cursor-pointer' onClick={handleSortByName}>
                     Name {nameSortOrder === 'asc' ? '▲' : '▼'}
                   </TableCell>
-                  <TableCell>Role</TableCell>
-                  <TableCell onClick={handleSortByEmail} className="cursor-pointer">
+                  <TableCell  className='w-[30%]' >Role</TableCell>
+                  <TableCell  className='w-[30%] cursor-pointer' onClick={handleSortByEmail}>
                     Email {sortOrder === 'asc' ? '▲' : '▼'}
                   </TableCell>
-                  <TableCell>Action</TableCell>
+                  <TableCell  className='w-[10%]'>Action</TableCell>
                 </TableRow>
               </TableHeader>
               <TableBody>
