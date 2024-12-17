@@ -19,13 +19,13 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal } from 'lucide-react';
 import { ProgressSpinner } from 'primereact/progressspinner';
-import { useToast } from "@/hooks/use-toast"
-import { useRouter } from 'next/navigation';
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
 
 interface Employee {
   id: number;
   name: string;
-  role: 'INTERN' | 'ADMIN' | 'ENGINEER'; // Enum-like role values
+  role: 'INTERN' | 'ADMIN' | 'ENGINEER';
   email: string;
 }
 
@@ -37,14 +37,19 @@ export default function EmployeesPage() {
   const [nameFilter, setNameFilter] = useState('');
   const [roleFilter, setRoleFilter] = useState<'INTERN' | 'ADMIN' | 'ENGINEER' | ''>('');
   const [emailFilter, setEmailFilter] = useState('');
-  const router = useRouter();
 
-  // Sorting state
+  // Dialog states
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null); // For deletion or editing
+  const [editData, setEditData] = useState<Partial<Employee>>({}); // Temporary edit state
+
+  // Sorting states for both email and name
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [nameSortOrder, setNameSortOrder] = useState<'asc' | 'desc'>('asc'); // Add separate state for name sorting
 
-  const { toast } = useToast(); // Destructure toast hook
+  const { toast } = useToast();
 
-  // Fetch data on filter change
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -63,7 +68,7 @@ export default function EmployeesPage() {
         console.log('API response:', data);
       } catch (error) {
         console.error('Error fetching employees:', error);
-        setEmployees([]); // Set an empty array to avoid mapping over `undefined`
+        setEmployees([]);
       } finally {
         setLoading(false);
       }
@@ -72,8 +77,7 @@ export default function EmployeesPage() {
     fetchData();
   }, [nameFilter, roleFilter, emailFilter]);
 
-  // Handle sorting
-  const handleSort = () => {
+  const handleSortByEmail = () => {
     const sortedEmployees = [...employees].sort((a, b) => {
       const comparison = a.email.localeCompare(b.email);
       return sortOrder === 'asc' ? comparison : -comparison;
@@ -82,46 +86,86 @@ export default function EmployeesPage() {
     setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
   };
 
-  // Handle navigation to create new user page
-  const handleCreateNewUser = () => {
-    router.push('/employees/create'); // Navigate to the "/create" page when clicked
+  const handleSortByName = () => {
+    const sortedEmployees = [...employees].sort((a, b) => {
+      const comparison = a.name.localeCompare(b.name);
+      return nameSortOrder === 'asc' ? comparison : -comparison;
+    });
+    setEmployees(sortedEmployees);
+    setNameSortOrder(nameSortOrder === 'asc' ? 'desc' : 'asc');
   };
 
-  // Handle Edit action
-  const handleEdit = (id: number) => {
-    router.push(`/employees/edit/${id}`); // Navigate to an edit page
+  const handleDeleteConfirm = (employee: Employee) => {
+    setSelectedEmployee(employee);
+    setDialogOpen(true);
   };
 
-  // Handle Delete action
-  const handleDelete = async (id: number, name: string) => {
-    if (confirm('Are you sure you want to delete this employee?')) {
-      try {
-        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_LOCAL_API_BASE_URL;
-        const response = await fetch(`${baseUrl}/api/employees/${id}`, {
-          method: 'DELETE',
-        });
-        if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+  const handleDelete = async () => {
+    if (!selectedEmployee) return;
 
-        setEmployees(employees.filter((employee) => employee.id !== id)); // Remove from the state
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_LOCAL_API_BASE_URL;
+      const response = await fetch(`${baseUrl}/api/employees/${selectedEmployee.id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error(`Error: ${response.statusText}`);
 
-        // Show success toast
-        toast({
-          title: 'Success!',
-          description: `Employee named "${name}" with ID ${id} was successfully deleted.`,
-        });
-        console.log(id,name)
-      } catch (error) {
-        console.error('Error deleting employee:', error);
-
-        // Show error toast
-        toast({
-          title: 'Error',
-          description: 'Failed to delete the employee. Please try again.',
-          variant: 'destructive',
-        });
-      }
+      setEmployees(employees.filter((employee) => employee.id !== selectedEmployee.id));
+      toast({
+        title: 'Success!',
+        description: `Employee "${selectedEmployee.name}" has been deleted.`,
+      });
+    } catch (error) {
+      console.error('Error deleting employee:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete the employee. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setDialogOpen(false);
+      setSelectedEmployee(null);
     }
   };
+
+  const handleEditConfirm = (employee: Employee) => {
+    setSelectedEmployee(employee);
+    setEditData({ ...employee }); // Pre-fill form with current data
+    setEditDialogOpen(true);
+  };
+
+  const handleEditSave = async () => {
+    if (!selectedEmployee) return;
+
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_LOCAL_API_BASE_URL;
+      const response = await fetch(`${baseUrl}/api/employees/${selectedEmployee.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editData),
+      });
+      if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+
+      toast({
+        title: 'Success!',
+        description: `Employee "${editData.name}" has been updated.`,
+      });
+
+      // Refresh the page
+      window.location.reload();
+    } catch (error) {
+      console.error('Error updating employee:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update the employee. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setEditDialogOpen(false);
+      setSelectedEmployee(null);
+    }
+  };
+
 
   return (
     <div className="flex items-center justify-center">
@@ -131,83 +175,141 @@ export default function EmployeesPage() {
           <CardDescription>Employees List</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4 w-full justify-between">
-            <div className='flex gap-10'>
-
-              <Input
-                placeholder="Filter emails..."
-                value={emailFilter}
-                onChange={(event) => setEmailFilter(event.target.value)}
-                className="max-w-sm"
-              />
-              <Button variant="secondary" className="bg-secondary" onClick={handleCreateNewUser}>
-                Create New User
-              </Button>
+          <div className='flex flex-col gap-4'>
+            <div className="flex gap-4 w-full justify-between">
+              <div className='flex gap-10'>
+                <Input
+                  placeholder="Filter emails..."
+                  value={emailFilter}
+                  onChange={(event) => setEmailFilter(event.target.value)}
+                  className="max-w-sm"
+                />
+                <Button variant="secondary" className="bg-secondary">
+                  Create New User
+                </Button>
+              </div>
+              <div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 w-8 p-0 bg-secondary">
+                      <span className="sr-only">Open menu</span>
+                      <MoreHorizontal />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Choose Role</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setRoleFilter('INTERN')}>Intern</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setRoleFilter('ADMIN')}>Admin</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setRoleFilter('ENGINEER')}>Engineer</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setRoleFilter('')}>All</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
-            <div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="h-8 w-8 p-0 bg-secondary">
-                    <span className="sr-only">Open menu</span>
-                    <MoreHorizontal />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Choose Role</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setRoleFilter('INTERN')}>Intern</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setRoleFilter('ADMIN')}>Admin</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setRoleFilter('ENGINEER')}>Engineer</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setRoleFilter('')}>All</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Role</TableCell>
-                <TableCell onClick={handleSort} className="cursor-pointer">
-                  Email {sortOrder === 'asc' ? '▲' : '▼'}
-                </TableCell>
-                <TableCell>Action</TableCell>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
+            <Table>
+              <TableHeader className='bg-lime-500 dark:bg-purple-500'>
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-4">
-                    <ProgressSpinner style={{ width: '50px', height: '50px' }} strokeWidth="8" animationDuration=".5s" />
+                  <TableCell onClick={handleSortByName} className="cursor-pointer">
+                    Name {nameSortOrder === 'asc' ? '▲' : '▼'}
                   </TableCell>
+                  <TableCell>Role</TableCell>
+                  <TableCell onClick={handleSortByEmail} className="cursor-pointer">
+                    Email {sortOrder === 'asc' ? '▲' : '▼'}
+                  </TableCell>
+                  <TableCell>Action</TableCell>
                 </TableRow>
-              ) : (
-                employees.map((employee) => (
-                  <TableRow key={employee.id}>
-                    <TableCell>{employee.name}</TableCell>
-                    <TableCell>{employee.role}</TableCell>
-                    <TableCell>{employee.email}</TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleEdit(employee.id)}>Edit</DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleDelete(employee.id, employee.name)}>Delete</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center py-4">
+                      <ProgressSpinner style={{ width: '50px', height: '50px' }} strokeWidth="8" animationDuration=".5s" />
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                ) : (
+                  employees.map((employee) => (
+                    <TableRow key={employee.id}>
+                      <TableCell>{employee.name}</TableCell>
+                      <TableCell>{employee.role}</TableCell>
+                      <TableCell>{employee.email}</TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <span className="sr-only">Open menu</span>
+                              <MoreHorizontal />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleEditConfirm(employee)}>Edit</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDeleteConfirm(employee)}>Delete</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Employee</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{selectedEmployee?.name}"? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setDialogOpen(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleDelete}>Delete</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Employee Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Employee</DialogTitle>
+            <DialogDescription>
+              Update the details for "{selectedEmployee?.name}".
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              placeholder="Name"
+              value={editData.name || ''}
+              onChange={(e) => setEditData((prev) => ({ ...prev, name: e.target.value }))}
+
+            />
+            <Input
+              placeholder="Email"
+              value={editData.email || ''}
+              onChange={(e) => setEditData((prev) => ({ ...prev, email: e.target.value }))}
+            />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost">{editData.role || 'Select Role'}</Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={() => setEditData((prev) => ({ ...prev, role: 'INTERN' }))}>Intern</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setEditData((prev) => ({ ...prev, role: 'ADMIN' }))}>Admin</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setEditData((prev) => ({ ...prev, role: 'ENGINEER' }))}>Engineer</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setEditDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleEditSave}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
