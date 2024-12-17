@@ -1,27 +1,27 @@
-'use client';
-import { useEffect, useState } from 'react';
+'use client'
+import { useEffect, useState } from 'react'
 import {
   Table,
   TableBody,
   TableCell,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/ui/table"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal } from 'lucide-react';
-import { ProgressSpinner } from 'primereact/progressspinner';
-import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
-import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationLink, PaginationNext } from '@/components/ui/pagination';
+} from "@/components/ui/card"
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { MoreHorizontal } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { useToast } from "@/hooks/use-toast"
+import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationLink, PaginationNext } from '@/components/ui/pagination'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface Employee {
   id: number;
@@ -237,11 +237,23 @@ export default function EmployeesPage() {
               </TableHeader>
               <TableBody>
                 {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={4} className="text-center py-4">
-                      <ProgressSpinner style={{ width: '50px', height: '50px' }} strokeWidth="8" animationDuration=".5s" />
-                    </TableCell>
-                  </TableRow>
+                  // Loop to create 7 rows with Skeletons
+                  [...Array(7)].map((_, index) => (
+                    <TableRow key={index}>
+                      <TableCell>
+                        <Skeleton className="w-24 h-6" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="w-24 h-6" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="w-24 h-6" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="w-24 h-6" />
+                      </TableCell>
+                    </TableRow>
+                  ))
                 ) : (
                   currentEmployees.map((employee) => (
                     <TableRow key={employee.id}>
