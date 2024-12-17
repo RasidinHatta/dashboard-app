@@ -50,9 +50,10 @@ const CreatePage = () => {
     e.preventDefault();
 
     setLoading(true);
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_LOCAL_API_BASE_URL;
 
     try {
-      const response = await fetch('/api/employees', {
+      const response = await fetch(`${baseUrl}/api/employees`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
