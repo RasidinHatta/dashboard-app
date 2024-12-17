@@ -21,6 +21,7 @@ import { MoreHorizontal } from 'lucide-react';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationLink, PaginationNext } from '@/components/ui/pagination';
 
 interface Employee {
   id: number;
@@ -47,6 +48,10 @@ export default function EmployeesPage() {
   // Sorting states for both email and name
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [nameSortOrder, setNameSortOrder] = useState<'asc' | 'desc'>('asc'); // Add separate state for name sorting
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(7); // Define how many items per page
 
   const { toast } = useToast();
 
@@ -76,6 +81,10 @@ export default function EmployeesPage() {
 
     fetchData();
   }, [nameFilter, roleFilter, emailFilter]);
+
+  // Pagination logic
+  const currentEmployees = employees.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const totalPages = Math.ceil(employees.length / itemsPerPage);
 
   const handleSortByEmail = () => {
     const sortedEmployees = [...employees].sort((a, b) => {
@@ -177,7 +186,13 @@ export default function EmployeesPage() {
         <CardContent>
           <div className='flex flex-col gap-4'>
             <div className="flex gap-4 w-full justify-between">
-              <div className='flex gap-10'>
+              <div className='flex gap-5'>
+                <Input
+                  placeholder="Filter by name..."
+                  value={nameFilter}
+                  onChange={(event) => setNameFilter(event.target.value)}
+                  className="max-w-sm"
+                />
                 <Input
                   placeholder="Filter emails..."
                   value={emailFilter}
@@ -228,7 +243,7 @@ export default function EmployeesPage() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  employees.map((employee) => (
+                  currentEmployees.map((employee) => (
                     <TableRow key={employee.id}>
                       <TableCell>{employee.name}</TableCell>
                       <TableCell>{employee.role}</TableCell>
@@ -252,6 +267,25 @@ export default function EmployeesPage() {
                 )}
               </TableBody>
             </Table>
+
+            {/* Pagination */}
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} />
+                </PaginationItem>
+                {[...Array(totalPages)].map((_, index) => (
+                  <PaginationItem key={index}>
+                    <PaginationLink onClick={() => setCurrentPage(index + 1)}>
+                      {index + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                <PaginationItem>
+                  <PaginationNext onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))} />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
           </div>
         </CardContent>
       </Card>
@@ -292,6 +326,7 @@ export default function EmployeesPage() {
               placeholder="Email"
               value={editData.email || ''}
               onChange={(e) => setEditData((prev) => ({ ...prev, email: e.target.value }))}
+
             />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
