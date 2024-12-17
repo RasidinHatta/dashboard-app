@@ -124,6 +124,9 @@ export default function EmployeesPage() {
         title: 'Success!',
         description: `Employee "${selectedEmployee.name}" has been deleted.`,
       });
+
+      // Refresh the page
+      window.location.reload();
     } catch (error) {
       console.error('Error deleting employee:', error);
       toast({
@@ -257,10 +260,10 @@ export default function EmployeesPage() {
                 ) : (
                   currentEmployees.map((employee) => (
                     <TableRow key={employee.id}>
-                      <TableCell>{employee.name}</TableCell>
-                      <TableCell>{employee.role.charAt(0).toUpperCase() + employee.role.slice(1).toLowerCase()}</TableCell>
-                      <TableCell>{employee.email}</TableCell>
-                      <TableCell>
+                      <TableCell className='w-[30%]'>{employee.name}</TableCell>
+                      <TableCell className='w-[30%]'>{employee.role.charAt(0).toUpperCase() + employee.role.slice(1).toLowerCase()}</TableCell>
+                      <TableCell className='w-[30%]'>{employee.email}</TableCell>
+                      <TableCell className='w-[10%]'>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="h-8 w-8 p-0">
