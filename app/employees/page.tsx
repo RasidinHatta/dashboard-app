@@ -22,6 +22,7 @@ import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogD
 import { useToast } from "@/hooks/use-toast"
 import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationLink, PaginationNext } from '@/components/ui/pagination'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useRouter } from 'next/navigation'
 
 interface Employee {
   id: number;
@@ -31,6 +32,11 @@ interface Employee {
 }
 
 export default function EmployeesPage() {
+  const router = useRouter();
+
+  const createEmployee = () => {
+    router.push('/employees/create');
+  };
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -146,6 +152,12 @@ export default function EmployeesPage() {
     setEditDialogOpen(true);
   };
 
+
+  const handleEditCancel = () => {
+    setEditDialogOpen(false)
+    window.location.reload()
+  }
+
   const handleEditSave = async () => {
     if (!selectedEmployee) return;
 
@@ -202,7 +214,7 @@ export default function EmployeesPage() {
                   onChange={(event) => setEmailFilter(event.target.value)}
                   className="max-w-sm"
                 />
-                <Button variant="secondary" className="bg-secondary">
+                <Button variant="secondary" className="bg-secondary" onClick={createEmployee}>
                   Create New User
                 </Button>
               </div>
@@ -355,7 +367,7 @@ export default function EmployeesPage() {
             </DropdownMenu>
           </div>
           <DialogFooter>
-            <Button variant="secondary" onClick={() => setEditDialogOpen(false)}>Cancel</Button>
+            <Button variant="secondary" onClick={handleEditCancel}>Cancel</Button>
             <Button onClick={handleEditSave}>Save</Button>
           </DialogFooter>
         </DialogContent>
