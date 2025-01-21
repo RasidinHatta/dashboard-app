@@ -68,13 +68,43 @@ export default function Header() {
         </DropdownMenu>
     );
 
+    const handleLogin = () => {
+        // Handle the logic for login
+        console.log("Login button clicked");
+        window.location.href = "/login"; // Redirect to login page
+    };
+
+    const handleRegister = () => {
+        // Handle the logic for Register
+        console.log("Register button clicked");
+        window.location.href = "/register"; // Redirect to login page
+    };
+
     return (
         <div className="p-10">
             <MegaMenu
                 model={items}
                 orientation="horizontal"
                 className="p-3 surface-0 shadow-2"
-                end={toggleTheme}
+                end={
+                    <div className="flex items-center gap-4">
+                        <Button
+                            variant="secondary"
+                            className="bg-secondary"
+                            onClick={handleLogin}
+                        >
+                            Login
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            className="bg-secondary"
+                            onClick={handleRegister}
+                        >
+                            Register
+                        </Button>
+                        {toggleTheme()}
+                    </div>
+                }
             />
         </div>
     );
