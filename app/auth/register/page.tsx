@@ -1,11 +1,11 @@
 import React from 'react'
 
-const LoginPage = () => {
+const RegisterPage = () => {
   return (
     <div className="flex items-center justify-center h-full">
-      Login Page
+      Register Page
     </div>
   )
 }
 
-export default LoginPage
+export default RegisterPage

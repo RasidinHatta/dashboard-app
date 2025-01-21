@@ -71,13 +71,13 @@ export default function Header() {
     const handleLogin = () => {
         // Handle the logic for login
         console.log("Login button clicked");
-        window.location.href = "/login"; // Redirect to login page
+        window.location.href = "/auth/login"; // Redirect to login page
     };
 
     const handleRegister = () => {
         // Handle the logic for Register
         console.log("Register button clicked");
-        window.location.href = "/register"; // Redirect to login page
+        window.location.href = "/auth/register"; // Redirect to login page
     };
 
     return (
