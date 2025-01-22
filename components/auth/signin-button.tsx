@@ -10,7 +10,7 @@ export function SignIn() {
   if (session && session.user) {
     return (
       <>
-        <h1 className="text-sky-600">{session.user.name}</h1>
+        <p className="text-sky-600">{session.user.name}</p>
         <SignOut />
       </>
     )

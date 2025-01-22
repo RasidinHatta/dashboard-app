@@ -1,5 +1,13 @@
-import NextAuth from "next-auth"
+import NextAuth, { CredentialsSignin } from "next-auth"
 import Credentials from "next-auth/providers/credentials"
+
+declare module "next-auth" {
+    interface User {
+        role: string;
+        createdAt: string;
+        updatedAt: string;
+    }
+}
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
     providers: [
@@ -24,8 +32,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     return null
                 }
 
-                const user = await res.json()
-                return user
+                const user = await res.json();
+                
+
+                if (user) {
+                    return user.user;
+                }
+
+                throw new CredentialsSignin("Invalid login");
             },
         }),
     ],

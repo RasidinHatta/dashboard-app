@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { useRouter } from 'next/navigation';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const CreatePage = () => {
     const [name, setName] = useState('');
@@ -17,28 +17,36 @@ const CreatePage = () => {
     // Handle form submission to create a new employee
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
         setLoading(true);
-        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_LOCAL_API_BASE_URL;
+        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
         try {
+            // Debug payload
+            console.log("Submitting the following payload:", { name, email, role });
+
             const response = await fetch(`${baseUrl}/api/employees`, {
-                method: 'POST',
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ name, email, role }),
+                body: JSON.stringify({ name, email, role, password: "123456" }), // Include default password in payload
             });
 
+            // Debug response
+            console.log("Response status:", response.status);
+
             if (!response.ok) {
-                throw new Error('Failed to create employee');
+                const errorText = await response.text();
+                console.error("Response body:", errorText);
+                throw new Error(`Failed to create employee. Status: ${response.status}`);
             }
 
             // Redirect after success
-            router.push('/employees');
+            console.log("Employee created successfully.");
+            router.push("/employees");
         } catch (error) {
-            console.error('Error creating employee:', error);
-            alert('Failed to create employee. Please try again.');
+            console.error("Error creating employee:", error);
+            alert("Failed to create employee. Please check the logs and try again.");
         } finally {
             setLoading(false);
         }
@@ -74,7 +82,10 @@ const CreatePage = () => {
                             />
                         </div>
                         <div className="mb-4">
-                            <Select value={role} onValueChange={(value) => setRole(value as 'INTERN' | 'ADMIN' | 'ENGINEER')}>
+                            <Select
+                                value={role}
+                                onValueChange={(value) => setRole(value as 'INTERN' | 'ADMIN' | 'ENGINEER')}
+                            >
                                 <SelectTrigger className="w-[180px]">
                                     <SelectValue placeholder="Select Role" />
                                 </SelectTrigger>
@@ -89,12 +100,12 @@ const CreatePage = () => {
                             <Button
                                 variant="secondary"
                                 className="bg-secondary"
-                                onClick={() => router.push('/employees')}
+                                onClick={() => router.push("/employees")}
                             >
                                 Cancel
                             </Button>
                             <Button type="submit" variant="secondary" disabled={loading}>
-                                {loading ? 'Creating...' : 'Create Employee'}
+                                {loading ? "Creating..." : "Create Employee"}
                             </Button>
                         </div>
                     </form>
