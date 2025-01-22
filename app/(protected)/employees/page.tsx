@@ -35,7 +35,7 @@ export default function EmployeesPage() {
   const router = useRouter();
 
   const createEmployee = () => {
-    router.push('/employees/create');
+    router.push('/employees/create'); 
   };
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
@@ -162,11 +162,16 @@ export default function EmployeesPage() {
   const handleEditSave = async () => {
     if (!selectedEmployee) return;
 
+    const gettoken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InJhc2lkaW5AZXJhc2VyLmNvbSIsInN1YiI6IlJhc2lkaW4gSGF0dGEiLCJpYXQiOjE3Mzc1MzgwODcsImV4cCI6MTczNzU0MTY4N30.GVxcGUO5H43dN4c2yO3n_xrVfBXRr8FatvRnj4rRd1o'
+
     try {
       const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_LOCAL_API_BASE_URL;
       const response = await fetch(`${baseUrl}/api/employees/${selectedEmployee.id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Authorization': `Bearer ${gettoken}`,
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(editData),
       });
       if (!response.ok) throw new Error(`Error: ${response.statusText}`);
