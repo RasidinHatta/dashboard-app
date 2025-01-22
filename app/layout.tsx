@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import Header from "@/components/Header"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Toaster } from "@/components/ui/toaster"
+import { SessionProvider } from "next-auth/react";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -25,7 +26,9 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <Header />
+            <SessionProvider>
+              <Header />
+            </SessionProvider>
             {children}
             <Toaster />
             <SpeedInsights />

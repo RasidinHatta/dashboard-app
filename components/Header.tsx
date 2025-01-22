@@ -12,10 +12,15 @@ import { Button } from "./ui/button";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import "./header.css";
+import { useSession } from "next-auth/react";
+import { SignOut } from "./auth/signout-button";
+import { SignIn } from "./auth/signin-button";
+import { auth } from "@/auth";
 
 export default function Header() {
     const { setTheme, resolvedTheme } = useTheme(); // Use resolvedTheme to get current theme
     const [mounted, setMounted] = useState(false); // Ensure the component is mounted
+    const { data: session } = useSession();
 
     useEffect(() => {
         // Ensure the component only renders client-side (hydration)
@@ -46,10 +51,12 @@ export default function Header() {
                 <Button variant="outline" size="icon">
                     {/* Dynamically adjust icon color */}
                     <Sun
-                        className={`h-[1.2rem] w-[1.2rem] transition-all ${resolvedTheme === "dark" ? "hidden" : "text-neutral-900"}`}
+                        className={`h-[1.2rem] w-[1.2rem] transition-all ${resolvedTheme === "dark" ? "hidden" : "text-neutral-900"
+                            }`}
                     />
                     <Moon
-                        className={`absolute h-[1.2rem] w-[1.2rem] transition-all ${resolvedTheme === "light" ? "hidden" : "text-neutral-100"}`}
+                        className={`absolute h-[1.2rem] w-[1.2rem] transition-all ${resolvedTheme === "light" ? "hidden" : "text-neutral-100"
+                            }`}
                     />
                     <span className="sr-only">Toggle theme</span>
                 </Button>
@@ -68,17 +75,10 @@ export default function Header() {
         </DropdownMenu>
     );
 
-    const handleLogin = () => {
-        // Handle the logic for login
-        console.log("Login button clicked");
-        window.location.href = "/auth/login"; // Redirect to login page
-    };
-
     const handleRegister = () => {
-        // Handle the logic for Register
-        console.log("Register button clicked");
-        window.location.href = "/auth/register"; // Redirect to login page
-    };
+        // Redirect to the register page
+        window.location.href = "/auth/register";
+    }
 
     return (
         <div className="p-10">
@@ -88,20 +88,22 @@ export default function Header() {
                 className="p-3 surface-0 shadow-2"
                 end={
                     <div className="flex items-center gap-4">
-                        <Button
-                            variant="secondary"
-                            className="bg-secondary"
-                            onClick={handleLogin}
-                        >
-                            Login
-                        </Button>
-                        <Button
-                            variant="secondary"
-                            className="bg-secondary"
-                            onClick={handleRegister}
-                        >
-                            Register
-                        </Button>
+                        {session?.user ? (
+                            <>
+                                <SignOut />
+                            </>
+                        ) : (
+                            <>
+                                <SignIn />
+                                <Button
+                                    variant="secondary"
+                                    className="bg-secondary"
+                                    onClick={handleRegister}
+                                >
+                                    Register
+                                </Button>
+                            </>
+                        )}
                         {toggleTheme()}
                     </div>
                 }

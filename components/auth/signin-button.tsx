@@ -1,14 +1,15 @@
-import { signIn } from "@/auth"
- 
+"use client"
+import { signIn } from "next-auth/react"
+import { Button } from "../ui/button"
+
 export function SignIn() {
   return (
-    <form
-      action={async () => {
-        "use server"
-        await signIn("Credentials", { redirectTo: "/" })
-      }}
+    <Button
+      variant="secondary"
+      className="bg-secondary"
+      onClick={() => signIn("Credentials", { redirectTo: "/employees" })}
     >
-      <button type="submit">Sign in</button>
-    </form>
+      Sign In
+    </Button >
   )
 }
