@@ -13,9 +13,7 @@ import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import "./header.css";
 import { useSession } from "next-auth/react";
-import { SignOut } from "./auth/signout-button";
 import { SignIn } from "./auth/signin-button";
-import { auth } from "@/auth";
 
 export default function Header() {
     const { setTheme, resolvedTheme } = useTheme(); // Use resolvedTheme to get current theme
@@ -90,7 +88,7 @@ export default function Header() {
                     <div className="flex items-center gap-4">
                         {session?.user ? (
                             <>
-                                <SignOut />
+                                <SignIn />
                             </>
                         ) : (
                             <>
