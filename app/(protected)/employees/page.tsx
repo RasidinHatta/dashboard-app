@@ -36,7 +36,7 @@ export default function EmployeesPage() {
   const router = useRouter();
 
   const createEmployee = () => {
-    router.push('/employees/create'); 
+    router.push('/employees/create');
   };
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
@@ -120,6 +120,13 @@ export default function EmployeesPage() {
     setSelectedEmployee(employee);
     setDialogOpen(true);
   };
+
+  const handleDeleteCancel = () => {
+    // Refresh the page
+    window.location.reload();
+    setDialogOpen(false);
+    setSelectedEmployee(null);
+  }
 
   const handleDelete = async () => {
     if (!selectedEmployee) return;
@@ -251,14 +258,14 @@ export default function EmployeesPage() {
             <Table>
               <TableHeader className='bg-lime-500 dark:bg-purple-500'>
                 <TableRow>
-                  <TableCell  className='w-[30%] cursor-pointer' onClick={handleSortByName}>
+                  <TableCell className='w-[30%] cursor-pointer' onClick={handleSortByName}>
                     Name {nameSortOrder === 'asc' ? '▲' : '▼'}
                   </TableCell>
-                  <TableCell  className='w-[30%]' >Role</TableCell>
-                  <TableCell  className='w-[30%] cursor-pointer' onClick={handleSortByEmail}>
+                  <TableCell className='w-[30%]' >Role</TableCell>
+                  <TableCell className='w-[30%] cursor-pointer' onClick={handleSortByEmail}>
                     Email {sortOrder === 'asc' ? '▲' : '▼'}
                   </TableCell>
-                  <TableCell  className='w-[10%]'>Action</TableCell>
+                  <TableCell className='w-[10%]'>Action</TableCell>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -338,7 +345,7 @@ export default function EmployeesPage() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="secondary" onClick={() => setDialogOpen(false)}>Cancel</Button>
+            <Button variant="secondary" onClick={handleDeleteCancel}>Cancel</Button>
             <Button variant="destructive" onClick={handleDelete}>Delete</Button>
           </DialogFooter>
         </DialogContent>
@@ -377,7 +384,7 @@ export default function EmployeesPage() {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          <DialogFooter>
+          <DialogFooter className='gap-2'>
             <Button variant="secondary" onClick={handleEditCancel}>Cancel</Button>
             <Button onClick={handleEditSave}>Save</Button>
           </DialogFooter>
