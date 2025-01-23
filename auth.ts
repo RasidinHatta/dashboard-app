@@ -1,13 +1,6 @@
 import NextAuth, { CredentialsSignin } from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 
-declare module "next-auth" {
-    interface User {
-        role: string;
-        createdAt: string;
-        updatedAt: string;
-    }
-}
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
     providers: [
@@ -36,11 +29,41 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 
 
                 if (user) {
-                    return user.user;
+                    return user;
                 }
 
                 throw new CredentialsSignin("Invalid login");
             },
         }),
     ],
+    callbacks: {
+        async jwt({token, user}) {
+            
+            if (user) return { ...token, ...user }
+            
+            user = token.user
+            // console.log("JWT", token.user)
+            // console.log("User", user)
+            return token;
+        },
+
+        async session({session, token}) {
+            // console.log("Session", session)
+            // console.log("Token", token)
+            if (token.user) {
+                session.user = {
+                    id: token.user.id,
+                    name: token.user.name,
+                    email: token.user.email,
+                    role: token.user.role,
+                    createdAt: token.user.createdAt,
+                    updatedAt: token.user.updatedAt,
+                    emailVerified: token.user.emailVerified,
+                };
+            }
+            session.backend_token = token.backend_token
+
+            return session;
+        }
+    }
 })

@@ -5,12 +5,13 @@ import { SignOut } from "./signout-button"
 
 export function SignIn() {
 
-  const { data: session } = useSession()
-
-  if (session && session.user) {
+  const { data: session, status } = useSession()
+  console.log("Session", session)
+  if (status === "authenticated" && session.user) {
     return (
       <>
         <p className="text-sky-600">{session.user.name}</p>
+        <p className="text-sky-600">{status}</p>
         <SignOut />
       </>
     )

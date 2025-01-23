@@ -23,6 +23,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationLink, PaginationNext } from '@/components/ui/pagination'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 
 interface Employee {
   id: number;
@@ -60,6 +61,10 @@ export default function EmployeesPage() {
   const [itemsPerPage] = useState(7); // Define how many items per page
 
   const { toast } = useToast();
+
+  //Session Management
+  const { data: session } = useSession()
+  const gettoken = session?.backend_token.accessToken
 
   useEffect(() => {
     const fetchData = async () => {
@@ -123,6 +128,9 @@ export default function EmployeesPage() {
       const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_LOCAL_API_BASE_URL;
       const response = await fetch(`${baseUrl}/api/employees/${selectedEmployee.id}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${gettoken}`,
+        },
       });
       if (!response.ok) throw new Error(`Error: ${response.statusText}`);
 
@@ -161,9 +169,6 @@ export default function EmployeesPage() {
 
   const handleEditSave = async () => {
     if (!selectedEmployee) return;
-
-    const gettoken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InJhc2lkaW5AZXJhc2VyLmNvbSIsInN1YiI6IlJhc2lkaW4gSGF0dGEiLCJpYXQiOjE3Mzc1MzgwODcsImV4cCI6MTczNzU0MTY4N30.GVxcGUO5H43dN4c2yO3n_xrVfBXRr8FatvRnj4rRd1o'
-
     try {
       const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_LOCAL_API_BASE_URL;
       const response = await fetch(`${baseUrl}/api/employees/${selectedEmployee.id}`, {
