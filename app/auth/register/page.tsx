@@ -4,17 +4,18 @@ import { Button } from "@/components/ui/button";
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { signIn } from "next-auth/react"; // Import signIn from next-auth
+import { Eye, EyeOff } from "react-feather"; // Import the eye icons (you can install this library via npm)
 
 const SignupPage = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<"INTERN" | "ADMIN" | "ENGINEER">("INTERN");
+  const [confirmPassword, setConfirmPassword] = useState(""); // Confirm password state
   const [loading, setLoading] = useState(false);
+  const [passwordVisible, setPasswordVisible] = useState(false); // Password visibility toggle
   const router = useRouter();
   const { toast } = useToast();
 
@@ -23,8 +24,22 @@ const SignupPage = () => {
     setLoading(true);
     const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+    // Check if passwords match
+    if (password !== confirmPassword) {
+      toast({
+        title: "Password Mismatch",
+        description: "Please ensure that the passwords match.",
+        variant: "destructive",
+      });
+      setLoading(false);
+      return; // Prevent further action if passwords don't match
+    }
+
     try {
-      console.log("Submitting the following payload:", { name, email, role });
+      console.log("Submitting the following payload:", { name, email, password });
+
+      // Always assign role as INTERN
+      const role = "INTERN";
 
       const response = await fetch(`${baseUrl}/api/auth/register`, {
         method: "POST",
@@ -70,19 +85,42 @@ const SignupPage = () => {
         }
       } else {
         const errorText = await response.text();
-        console.error("Response body:", errorText);
-        throw new Error(`Failed to sign up. Status: ${response.status}`);
+        const parsedError = JSON.parse(errorText); 
+        toast({
+          title: "Register Failed",
+          description: `Credential Error: ${parsedError}`,
+          variant: "destructive",
+        });
+        if (response.status === 409) throw new Error(`Failed to sign up. Status: Email already exist`);
       }
     } catch (error) {
-      console.error("Signup failed:", error);
-      toast({
-        title: "Registration Failed",
-        description: "Please check the credentials and try again.",
-        variant: "destructive",
-      });
+      console.log(error)
+    
+      // Check if the error is a response from the server (e.g., 409 Conflict)
+      if (error instanceof Error) {
+        // Only show a custom toast message if it's a known error
+        const errorMessage = error.message || "An unexpected error occurred";
+        toast({
+          title: "Registration Failed",
+          description: `Credential Error: ${errorMessage}`,
+          variant: "destructive",
+        });
+      } else {
+        // Handle unexpected errors gracefully
+        toast({
+          title: "Registration Failed",
+          description: "Please check the credentials and try again.",
+          variant: "destructive",
+        });
+      }    
     } finally {
       setLoading(false);
     }
+  };
+
+  // Handle cancel action (redirect to home)
+  const handleCancel = () => {
+    router.push("/"); // Only redirect to home when user clicks Cancel
   };
 
   return (
@@ -97,7 +135,7 @@ const SignupPage = () => {
             <div className="mb-4">
               <Input
                 type="text"
-                placeholder="Employee Name"
+                placeholder="Your Name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full mr-auto"
@@ -114,37 +152,44 @@ const SignupPage = () => {
                 required
               />
             </div>
-            <div className="mb-4">
+            <div className="mb-4 relative">
               <Input
-                type="password"
+                type={passwordVisible ? "text" : "password"} // Toggle between text and password
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full mr-auto"
                 required
               />
-            </div>
-            <div className="mb-4 w-full mr-auto">
-              <Select
-                value={role}
-                onValueChange={(value) => setRole(value as "INTERN" | "ADMIN" | "ENGINEER")}
+              <div
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                onClick={() => setPasswordVisible(!passwordVisible)} // Toggle password visibility
               >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select Role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="INTERN">Intern</SelectItem>
-                  <SelectItem value="ADMIN">Admin</SelectItem>
-                  <SelectItem value="ENGINEER">Engineer</SelectItem>
-                </SelectContent>
-              </Select>
+                {passwordVisible ? <EyeOff size={20} /> : <Eye size={20} />}
+              </div>
+            </div>
+            <div className="mb-4 relative">
+              <Input
+                type={passwordVisible ? "text" : "password"} // Use the same toggle state for confirm password
+                placeholder="Confirm Password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full mr-auto"
+                required
+              />
+              <div
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                onClick={() => setPasswordVisible(!passwordVisible)} // Toggle password visibility for confirm password
+              >
+                {passwordVisible ? <EyeOff size={20} /> : <Eye size={20} />}
+              </div>
             </div>
 
             <div className="flex justify-between gap-4 mt-4">
               <Button
                 variant="secondary"
                 className="bg-secondary"
-                onClick={() => router.push("/")}
+                onClick={handleCancel} // Call the handleCancel function
               >
                 Cancel
               </Button>

@@ -19,11 +19,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     body: JSON.stringify({ email, password }),
                 })
 
-                if (res.status == 401) {
-                    console.log(res.statusText)
-
-                    return null
-                }
+                if (res.status >= 400 && res.status < 600) {
+                    console.error(`Error during authentication: ${res.statusText} (${res.status})`);
+                    throw new Error("Authentication failed. Please check your credentials or try again later.");
+                }                
 
                 const user = await res.json();
                 

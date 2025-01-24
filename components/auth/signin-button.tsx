@@ -2,21 +2,15 @@
 import { useSession, signIn } from "next-auth/react"
 import { Button } from "../ui/button"
 import { SignOut } from "./signout-button"
+import { useEmployeeData } from "@/hooks/useEmployeeData"
 
 export function SignIn() {
 
-  const { data: session, status } = useSession()
+  const { session, status } = useEmployeeData()
   console.log("Session", session)
-  if (status === "authenticated" && session.user) {
+  if (status === "authenticated") {
     return (
       <>
-        <Button
-          variant="secondary"
-          className="bg-secondary"
-          onClick={() => (window.location.href = "/dashboard")}
-        >
-          {session.user.name}'s Profile
-        </Button>
         <SignOut />
       </>
     )

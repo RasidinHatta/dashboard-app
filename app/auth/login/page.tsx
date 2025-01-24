@@ -2,10 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation"; // Use router for client-side navigation
 import { Input } from "@/components/ui/input";
 import React, { useState } from "react";
-import { signIn } from "next-auth/react";  // Import NextAuth's signIn method
+import { signIn } from "next-auth/react"; // Import NextAuth's signIn method
 import { useToast } from "@/hooks/use-toast";
 
 const LoginPage = () => {
@@ -28,8 +28,15 @@ const LoginPage = () => {
     });
 
     if (res?.error) {
+      // If there's an error, show it and don't proceed to the toast or redirect
       setError("Invalid credentials. Please try again.");
+      toast({
+        title: "Login Failed",
+        description: "Invalid email or password. Please check your credentials.",
+        variant: "destructive",
+      });
     } else if (res?.ok) {
+      // Show success toast and redirect only when login is successful
       toast({
         title: "Login Successful",
         description: "Welcome! Redirecting you to the dashboard.",
@@ -39,6 +46,11 @@ const LoginPage = () => {
     }
 
     setLoading(false);
+  };
+
+
+  const handleCancel = () => {
+    router.push("/"); // Use router.push for navigation
   };
 
   return (
@@ -74,7 +86,12 @@ const LoginPage = () => {
             {error && <div className="text-red-500 text-sm mb-4">{error}</div>} {/* Display error */}
 
             <div className="flex justify-between gap-4 mt-4">
-              <Button variant="secondary" className="bg-secondary" onClick={() => router.push("/")}>
+              <Button
+                type="button" // Make this a "button" type to avoid triggering form submission
+                variant="secondary"
+                className="bg-secondary"
+                onClick={handleCancel}
+              >
                 Cancel
               </Button>
               <Button type="submit" variant="secondary" disabled={loading}>
