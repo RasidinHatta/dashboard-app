@@ -6,6 +6,7 @@ interface Employee {
     name: string;
     email: string;
     password?: string;
+    updatedAt: string
 }
 
 export const useEmployeeData = () => {

@@ -365,7 +365,6 @@ export default function EmployeesPage() {
               placeholder="Name"
               value={editData.name || ''}
               onChange={(e) => setEditData((prev) => ({ ...prev, name: e.target.value }))}
-
             />
             <Input
               placeholder="Email"
