@@ -33,15 +33,20 @@ export default function Header() {
     const items = [
         {
             label: "Home",
-            icon: "pi pi-fw pi-home",
+            icon: "pi pi-fw pi-home", // Suitable for Home
             command: () => (window.location.href = "/"),
         },
         {
+            label: "Dashboard",
+            icon: "pi pi-fw pi-chart-bar", // Suitable for Dashboard
+            command: () => (window.location.href = "/dashboard"),
+        },
+        {
             label: "Employees",
-            icon: "pi pi-fw pi-th-large",
+            icon: "pi pi-fw pi-users", // Suitable for Employees
             command: () => (window.location.href = "/employees"),
         },
-    ];
+    ];    
 
     const toggleTheme = () => (
         <DropdownMenu>

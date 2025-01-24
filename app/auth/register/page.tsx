@@ -5,15 +5,15 @@ import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { signIn } from "next-auth/react"; // Import signIn from next-auth
 
 const SignupPage = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [role, setRole] = useState<'INTERN' | 'ADMIN' | 'ENGINEER'>('INTERN');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState<"INTERN" | "ADMIN" | "ENGINEER">("INTERN");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
@@ -24,7 +24,6 @@ const SignupPage = () => {
     const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
     try {
-      // Debug payload
       console.log("Submitting the following payload:", { name, email, role });
 
       const response = await fetch(`${baseUrl}/api/auth/register`, {
@@ -32,51 +31,50 @@ const SignupPage = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name, email, password, role }), // Include default password in payload
+        body: JSON.stringify({ name, email, password, role }),
       });
 
-      // Check for the 204 status and ignore it
       if (response.status === 204) {
-        console.log("No content returned, ignoring...");
-        return;
-      }
+        console.log("Registration succeeded with no content returned.");
+        toast({
+          title: "Registration Successful",
+          description: "Your registration was successful, but no additional data was returned.",
+          variant: "default",
+        });
+      } else if (response.ok) {
+        const responseData = await response.json();
+        console.log("Registration successful:", responseData);
 
-      // Check if the registration was successful
-      if (!response.ok) {
+        toast({
+          title: "Registration Successful",
+          description: "You have successfully registered. Logging you in...",
+          variant: "default",
+        });
+
+        // Auto-login after successful registration
+        const loginResponse = await signIn("credentials", {
+          redirect: false, // Prevent redirect to another page
+          email,
+          password,
+        });
+
+        if (loginResponse?.ok) {
+          toast({
+            title: "Login Successful",
+            description: "Welcome! Redirecting you to the dashboard.",
+            variant: "default",
+          });
+          router.push("/dashboard"); // Redirect to the dashboard or another page
+        } else {
+          throw new Error("Auto-login failed. Please log in manually.");
+        }
+      } else {
         const errorText = await response.text();
         console.error("Response body:", errorText);
-        throw new Error(`Failed to signUp. Status: ${response.status}`);
+        throw new Error(`Failed to sign up. Status: ${response.status}`);
       }
-
-      // Output toast and proceed with redirect after successful signup
-      toast({
-        title: "Registration Successful",
-        description: "You have successfully registered and are now logged in.",
-        variant: "default",
-      });
-
-      // Sign in the user automatically after registration
-      const loginResponse = await signIn("Credentials", {
-        redirectTo: "/",  // Redirect to the homepage after successful login
-        email,
-        password, // Make sure this matches the field names used in your NextAuth configuration
-      });
-
-      // If the sign-in is successful, manually redirect to homepage
-      if (loginResponse?.ok) {
-        console.log("Login successful.");
-        router.push("/"); // Redirect to homepage
-      } else {
-        console.error("Login failed:", loginResponse?.error);
-        toast({
-          title: "Login Failed",
-          description: "Please check your credentials.",
-          variant: "destructive",
-        });
-      }
-
     } catch (error) {
-      console.error("signUp Failed:", error);
+      console.error("Signup failed:", error);
       toast({
         title: "Registration Failed",
         description: "Please check the credentials and try again.",
@@ -87,13 +85,12 @@ const SignupPage = () => {
     }
   };
 
-
   return (
     <div className="flex items-center justify-center my-20">
       <Card className="w-[20%]">
         <CardHeader>
           <CardTitle>Sign Up</CardTitle>
-          <CardDescription>Sign Up to our page</CardDescription>
+          <CardDescription>Sign up to our page</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit}>
@@ -130,7 +127,7 @@ const SignupPage = () => {
             <div className="mb-4 w-full mr-auto">
               <Select
                 value={role}
-                onValueChange={(value) => setRole(value as 'INTERN' | 'ADMIN' | 'ENGINEER')}
+                onValueChange={(value) => setRole(value as "INTERN" | "ADMIN" | "ENGINEER")}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select Role" />
