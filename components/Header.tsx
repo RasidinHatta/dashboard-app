@@ -46,7 +46,7 @@ export default function Header() {
             icon: "pi pi-fw pi-users", // Suitable for Employees
             command: () => (window.location.href = "/employees"),
         },
-    ];    
+    ];
 
     const toggleTheme = () => (
         <DropdownMenu>
@@ -91,13 +91,9 @@ export default function Header() {
                 className="p-3 surface-0 shadow-2"
                 end={
                     <div className="flex items-center gap-4">
-                        {session?.user ? (
-                            <>
-                                <SignIn />
-                            </>
-                        ) : (
-                            <>
-                                <SignIn />
+                        <>
+                            <SignIn />
+                            {!session?.user && (
                                 <Button
                                     variant="secondary"
                                     className="bg-secondary"
@@ -105,8 +101,8 @@ export default function Header() {
                                 >
                                     Register
                                 </Button>
-                            </>
-                        )}
+                            )}
+                        </>
                         {toggleTheme()}
                     </div>
                 }

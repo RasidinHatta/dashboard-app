@@ -10,8 +10,13 @@ export function SignIn() {
   if (status === "authenticated" && session.user) {
     return (
       <>
-        <p className="text-sky-600">{session.user.name}</p>
-        <p className="text-sky-600">{status}</p>
+        <Button
+          variant="secondary"
+          className="bg-secondary"
+          onClick={() => (window.location.href = "/dashboard")}
+        >
+          {session.user.name}
+        </Button>
         <SignOut />
       </>
     )
