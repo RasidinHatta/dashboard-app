@@ -15,7 +15,7 @@ export function SignIn() {
           className="bg-secondary"
           onClick={() => (window.location.href = "/dashboard")}
         >
-          {session.user.name}
+          {session.user.name}'s Profile
         </Button>
         <SignOut />
       </>
